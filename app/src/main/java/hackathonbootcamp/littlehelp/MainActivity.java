@@ -1,17 +1,20 @@
 package hackathonbootcamp.littlehelp;
 
-import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 import org.apache.http.HttpResponse;
 
-public class MainActivity extends Activity implements LoaderCallbacks<HttpResponse> {
+public class MainActivity extends ActionBarActivity implements LoaderCallbacks<HttpResponse> {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,23 +79,34 @@ public class MainActivity extends Activity implements LoaderCallbacks<HttpRespon
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
-    public void helpRequest(String str) {
-        // Bundleにはパラメータを保存する（1）
-        Bundle bundle = new Bundle();
-        if (str == "1") {
-            // 大阪府の天気予報を返すAPIのURLを格納する（2）
-            bundle.putString("url", "http://helpme4civictech.herokuapp.com/helpme?user_id=1&severity=" + str + "&latitude=34.7416251&longitude=135.5506565&msg=ああああ");
-        } else if (str == "2") {
-            // 大阪府の天気予報を返すAPIのURLを格納する（2）
-            bundle.putString("url", "http://helpme4civictech.herokuapp.com/helpme?user_id=1&severity=" + str + "&latitude=34.715483&longitude=135.504286&msg=ああああ");
-        } else {
-            // 大阪府の天気予報を返すAPIのURLを格納する（2）
-            bundle.putString("url", "http://helpme4civictech.herokuapp.com/helpme?user_id=1&severity=" + str + "&latitude=34.7010813&longitude=135.4881838&msg=ああああ");
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingActivity.class);
+            startActivity(intent);
         }
-        //
+
+        return super.onOptionsItemSelected(item);
+    }
+    public void helpRequest(String str) {
+        // 助けて通知を投げる
+        // URL：http://helpnotice.herokuapp.com/helpme
+        // パラメータ1：need_help_id
+        // パラメータ2：severity
+        // パラメータ3：latitude
+        // パラメータ4：longitude
+        Bundle bundle = new Bundle();
+        String url = "http://helpnotice.herokuapp.com/helpme";
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        String needHelpId = sp.getString("needHelpId", null);
+        String latitude = "34.645842";
+        String longitude = "135.513971";
+        bundle.putString("url", url + "?need_help_id=" + needHelpId + "&severity=" + str + "&latitude=" + latitude + "&longitude=" + longitude);
         // LoaderManagerの初期化（3）
         getLoaderManager().initLoader(0, bundle, this);
     }
